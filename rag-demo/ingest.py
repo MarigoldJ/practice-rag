@@ -16,8 +16,11 @@ from openai import OpenAI
 
 from utils import load_documents, prepare_chunks_with_metadata
 
-# ChromaDB 저장 경로
-CHROMA_DIR = "./chroma_db"
+# 이 파일이 위치한 디렉토리 (경로를 안전하게 잡기 위해 사용)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ChromaDB 저장 경로 (프로젝트 폴더 안에 생성됨)
+CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
 COLLECTION_NAME = "docs_collection"
 
 # 임베딩 모델
@@ -39,7 +42,8 @@ def get_embeddings(client: OpenAI, texts: List[str]) -> List[List[float]]:
     """
     텍스트 목록을 OpenAI Embeddings API로 임베딩합니다.
 
-    한 번에 여러 텍스트를 배치로 처리하여 API 호출 횟수를 줄입니다.
+    여러 텍스트를 한 번의 API 호출로 한꺼번에 처리합니다.
+    (하나씩 보내는 것보다 빠르고 효율적입니다.)
     """
     response = client.embeddings.create(
         model=EMBEDDING_MODEL,
@@ -53,13 +57,17 @@ def get_chroma_client() -> chromadb.PersistentClient:
     return chromadb.PersistentClient(path=CHROMA_DIR)
 
 
-def ingest_documents(docs_dir: str = "docs") -> dict:
+def ingest_documents(docs_dir: str = None) -> dict:
     """
     문서를 읽어서 임베딩한 후 ChromaDB에 저장합니다.
 
     Returns:
         {"doc_count": 문서 수, "chunk_count": 총 chunk 수}
     """
+    # docs_dir이 지정되지 않으면 이 파일 기준 ./docs 폴더를 사용
+    if docs_dir is None:
+        docs_dir = os.path.join(BASE_DIR, "docs")
+
     # 1단계: 문서 로드
     documents = load_documents(docs_dir)
 

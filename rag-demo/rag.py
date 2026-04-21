@@ -7,10 +7,7 @@ rag.py - RAG 질의응답 모듈
 3. 검색된 chunk를 근거로 OpenAI Responses API를 사용해 답변을 생성합니다.
 """
 
-import os
 from typing import List, Dict
-
-from openai import OpenAI
 
 from ingest import (
     get_chroma_client,
@@ -42,7 +39,7 @@ def search_similar_chunks(
             ...
         ]
     """
-    # 질문을 임베딩
+    # 질문을 벡터(숫자 배열)로 변환
     client = get_openai_client()
     response = client.embeddings.create(
         model=EMBEDDING_MODEL,
@@ -50,7 +47,7 @@ def search_similar_chunks(
     )
     query_embedding = response.data[0].embedding
 
-    # ChromaDB에서 유사도 검색
+    # ChromaDB에서 질문 벡터와 가장 비슷한 chunk를 검색
     chroma_client = get_chroma_client()
     collection = chroma_client.get_collection(COLLECTION_NAME)
 
@@ -80,7 +77,7 @@ def generate_answer(query: str, context_chunks: List[Dict]) -> str:
     핵심: 검색된 문서 내용만을 근거로 답변하며,
     근거가 부족하면 솔직하게 "근거를 찾지 못했다"고 답합니다.
     """
-    # 검색된 chunk들을 하나의 컨텍스트 문자열로 조합
+    # 검색된 chunk들을 하나의 참고 자료 문자열로 합치기
     context_parts = []
     for i, chunk in enumerate(context_chunks):
         context_parts.append(

@@ -2,7 +2,7 @@
 utils.py - 문서 로딩 및 텍스트 분할 유틸리티
 
 이 모듈은 /docs 폴더의 문서를 읽어오고,
-RAG에 사용할 수 있도록 적절한 크기의 chunk로 분할합니다.
+검색에 사용할 수 있도록 적절한 크기의 조각(chunk)으로 나눕니다.
 """
 
 import os
@@ -42,13 +42,15 @@ def split_into_chunks(
     chunk_overlap: int = 50,
 ) -> List[str]:
     """
-    텍스트를 지정된 크기의 chunk로 분할합니다.
-    chunk 사이에 약간의 겹침(overlap)을 두어 문맥이 끊기지 않도록 합니다.
+    텍스트를 지정된 크기의 조각(chunk)으로 나눕니다.
+
+    조각 사이에 약간의 겹침(overlap)을 두어 문장이 잘려도
+    앞뒤 맥락이 연결되도록 합니다.
 
     Args:
-        text: 분할할 원본 텍스트
-        chunk_size: 각 chunk의 최대 글자 수
-        chunk_overlap: chunk 간 겹치는 글자 수
+        text: 나눌 원본 텍스트
+        chunk_size: 각 조각의 최대 글자 수 (기본 500자)
+        chunk_overlap: 조각 간 겹치는 글자 수 (기본 50자)
     """
     if not text:
         return []
