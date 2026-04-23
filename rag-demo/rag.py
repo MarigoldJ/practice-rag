@@ -7,10 +7,7 @@ rag.py - RAG 질의응답 모듈
 3. 검색된 chunk를 근거로 OpenAI Responses API를 사용해 답변을 생성합니다.
 """
 
-import os
 from typing import List, Dict
-
-from openai import OpenAI
 
 from ingest import (
     get_chroma_client,
